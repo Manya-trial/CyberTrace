@@ -38,7 +38,7 @@ def ip_report():
         'org': request.form.get('org'),
         'timezone': request.form.get('timezone'),
     }
-    pdf_bytes = generate_report(...)
+    pdf_bytes = generate_report('IP Analyzer', data)
     if pdf_bytes:
         return send_file(
             io.BytesIO(pdf_bytes),
@@ -70,7 +70,7 @@ def email_report():
         'dkim': request.form.get('dkim'),
         'spoof_alert': request.form.get('spoof_alert'),
     }
-    pdf_bytes = generate_report(...)
+    pdf_bytes = generate_report('Email Header Analyzer', data)
     if pdf_bytes:
             return send_file(
                 io.BytesIO(pdf_bytes),
@@ -101,7 +101,7 @@ def url_report():
         'harmless': request.form.get('harmless'),
         'total_engines': request.form.get('total_engines'),
     }
-    pdf_bytes = generate_report(...)
+    pdf_bytes = generate_report('URL Scanner', data)
     if pdf_bytes:
             return send_file(
                 io.BytesIO(pdf_bytes),
@@ -134,7 +134,7 @@ def cdr_report():
         'top_callers': request.form.get('top_callers'),
     }
     chart_b64 = request.form.get('chart_callers')
-    pdf_bytes = generate_report(...)
+    pdf_bytes = generate_report('CDR Parser', data, chart_b64)
     if pdf_bytes:
             return send_file(
                 io.BytesIO(pdf_bytes),
