@@ -101,4 +101,5 @@ def generate_report(module_name, data, chart_b64=None):
         return buffer.getvalue()
 
     except Exception as e:
+        print(f"PDF ERROR: {e}")
         return None
