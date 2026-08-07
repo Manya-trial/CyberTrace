@@ -1,3 +1,4 @@
+import io
 from fpdf import FPDF
 import base64
 import os
