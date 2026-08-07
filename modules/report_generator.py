@@ -94,10 +94,11 @@ def generate_report(module_name, data, chart_b64=None):
 
         # Save
         filename = f"CyberTrace_{module_name.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
-        os.makedirs('static', exist_ok=True)
-        output_path = os.path.join('static', filename)
-        pdf.output(output_path)
-        return filename
+        import io
+        buffer = io.BytesIO()
+        pdf.output(buffer)
+        buffer.seek(0)
+        return buffer.getvalue()
 
     except Exception as e:
         return None

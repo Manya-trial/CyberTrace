@@ -1,3 +1,4 @@
+import io
 from flask import Flask, render_template, request, send_file
 from modules.ip_analyzer import analyze_ip
 from modules.email_analyzer import analyze_email_header
@@ -37,9 +38,14 @@ def ip_report():
         'org': request.form.get('org'),
         'timezone': request.form.get('timezone'),
     }
-    filename = generate_report('IP Analyzer', data)
-    if filename:
-        return send_file(os.path.join('static', filename), as_attachment=True)
+    pdf_bytes = generate_report(...)
+    if pdf_bytes:
+        return send_file(
+            io.BytesIO(pdf_bytes),
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name='CyberTrace_Report.pdf'
+       )
     return "Report generation failed", 500
 
 # EMAIL ANALYZER
@@ -64,9 +70,14 @@ def email_report():
         'dkim': request.form.get('dkim'),
         'spoof_alert': request.form.get('spoof_alert'),
     }
-    filename = generate_report('Email Header Analyzer', data)
-    if filename:
-        return send_file(os.path.join('static', filename), as_attachment=True)
+    pdf_bytes = generate_report(...)
+    if pdf_bytes:
+            return send_file(
+                io.BytesIO(pdf_bytes),
+                mimetype='application/pdf',
+                as_attachment=True,
+                download_name='CyberTrace_Report.pdf'
+           )
     return "Report generation failed", 500
 
 # URL SCANNER
@@ -90,11 +101,15 @@ def url_report():
         'harmless': request.form.get('harmless'),
         'total_engines': request.form.get('total_engines'),
     }
-    filename = generate_report('URL Scanner', data)
-    if filename:
-        return send_file(os.path.join('static', filename), as_attachment=True)
+    pdf_bytes = generate_report(...)
+    if pdf_bytes:
+            return send_file(
+                io.BytesIO(pdf_bytes),
+                mimetype='application/pdf',
+                as_attachment=True,
+                download_name='CyberTrace_Report.pdf'
+           )
     return "Report generation failed", 500
-
 # CDR PARSER
 @app.route('/cdr', methods=['GET', 'POST'])
 def cdr_page():
@@ -119,9 +134,14 @@ def cdr_report():
         'top_callers': request.form.get('top_callers'),
     }
     chart_b64 = request.form.get('chart_callers')
-    filename = generate_report('CDR Parser', data, chart_b64)
-    if filename:
-        return send_file(os.path.join('static', filename), as_attachment=True)
+    pdf_bytes = generate_report(...)
+    if pdf_bytes:
+            return send_file(
+                io.BytesIO(pdf_bytes),
+                mimetype='application/pdf',
+                as_attachment=True,
+                download_name='CyberTrace_Report.pdf'
+           )
     return "Report generation failed", 500
 
 if __name__ == '__main__':
