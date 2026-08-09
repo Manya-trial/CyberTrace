@@ -1,106 +1,99 @@
-import io
 from fpdf import FPDF
-import base64
-import os
 from datetime import datetime
-
-class CyberTraceReport(FPDF):
-    def header(self):
-        self.set_fill_color(13, 20, 39)
-        self.rect(0, 0, 210, 30, 'F')
-        self.set_font('Arial', 'B', 16)
-        self.set_text_color(79, 195, 247)
-        self.cell(0, 15, 'CyberTrace - Digital Evidence Report', ln=True, align='C')
-        self.set_font('Arial', '', 9)
-        self.set_text_color(107, 140, 173)
-        self.cell(0, 8, 'Cyber Police Station Jammu | Developed by Manya Gupta', ln=True, align='C')
-        self.ln(5)
-
-    def footer(self):
-        self.set_y(-15)
-        self.set_font('Arial', 'I', 8)
-        self.set_text_color(107, 140, 173)
-        self.cell(0, 10, f'Page {self.page_no()} | CyberTrace | Confidential', align='C')
 
 def generate_report(module_name, data, chart_b64=None):
     try:
-        pdf = CyberTraceReport()
+        pdf = FPDF(orientation='P', unit='mm', format='A4')
+        pdf.set_margins(15, 15, 15)
         pdf.add_page()
         pdf.set_auto_page_break(auto=True, margin=15)
 
+        # Header background
+        pdf.set_fill_color(13, 20, 39)
+        pdf.rect(0, 0, 210, 40, 'F')
+
         # Title
-        pdf.set_font('Arial', 'B', 13)
-        pdf.set_text_color(30, 30, 60)
+        pdf.set_xy(15, 8)
+        pdf.set_font('Arial', 'B', 18)
+        pdf.set_text_color(79, 195, 247)
+        pdf.cell(180, 10, 'CyberTrace', ln=True, align='C')
+
+        pdf.set_xy(15, 20)
+        pdf.set_font('Arial', '', 10)
+        pdf.set_text_color(200, 220, 240)
+        pdf.cell(180, 8, 'Digital Evidence Analyzer | Cyber Police Station Jammu', ln=True, align='C')
+
+        pdf.set_xy(15, 30)
+        pdf.set_font('Arial', '', 9)
+        pdf.set_text_color(150, 180, 200)
+        pdf.cell(180, 8, 'Developed by Manya Gupta | B.Tech CSE', ln=True, align='C')
+
+        pdf.set_y(50)
+
+        # Module name box
         pdf.set_fill_color(220, 235, 250)
-        pdf.cell(0, 10, f'Module: {module_name}', ln=True, fill=True)
+        pdf.set_text_color(20, 60, 120)
+        pdf.set_font('Arial', 'B', 13)
+        pdf.cell(180, 10, f'  Module: {module_name}', ln=True, fill=True)
         pdf.ln(3)
 
-        # Timestamp
-        pdf.set_font('Arial', '', 10)
-        pdf.set_text_color(80, 80, 80)
-        pdf.cell(0, 8, f'Report Generated: {datetime.now().strftime("%d-%m-%Y %H:%M:%S")}', ln=True)
-        pdf.cell(0, 8, f'Analyst: Manya Gupta | Cyber Police Station Jammu', ln=True)
+        # Metadata
+        pdf.set_font('Arial', '', 9)
+        pdf.set_text_color(100, 100, 100)
+        pdf.cell(180, 6, f'Generated: {datetime.now().strftime("%d-%m-%Y %H:%M:%S")}', ln=True)
+        pdf.cell(180, 6, 'Analyst: Manya Gupta | Cyber Police Station Jammu', ln=True)
         pdf.ln(5)
 
-        # Divider
+        # Divider line
         pdf.set_draw_color(79, 195, 247)
-        pdf.set_line_width(0.5)
-        pdf.line(10, pdf.get_y(), 200, pdf.get_y())
-        pdf.ln(5)
+        pdf.set_line_width(0.8)
+        pdf.line(15, pdf.get_y(), 195, pdf.get_y())
+        pdf.ln(6)
 
-        # Data rows
+        # Findings header
         pdf.set_font('Arial', 'B', 11)
         pdf.set_text_color(20, 60, 120)
-        pdf.cell(0, 8, 'Findings:', ln=True)
+        pdf.cell(180, 8, 'FINDINGS', ln=True)
         pdf.ln(2)
 
-        pdf.set_font('Arial', '', 10)
-        pdf.set_text_color(30, 30, 30)
-
+        # Data rows alternating background
+        colors = [(240, 245, 255), (255, 255, 255)]
+        i = 0
         for key, value in data.items():
-            if key in ['status', 'chart_callers', 'chart_network', 'received_ips', 'top_callers']:
-                continue
-            if isinstance(value, bool):
-                value = 'Yes' if value else 'No'
-            pdf.set_font('Arial', 'B', 10)
-            pdf.set_text_color(20, 60, 120)
-            pdf.cell(55, 8, str(key).replace('_', ' ').title() + ':', border=0)
-            pdf.set_font('Arial', '', 10)
+            if value is None:
+                value = 'N/A'
+            label = str(key).replace('_', ' ').upper()
+            val = str(value)
+
+            # Row background
+            pdf.set_fill_color(*colors[i % 2])
+            pdf.set_text_color(60, 80, 120)
+            pdf.set_font('Arial', 'B', 9)
+            pdf.cell(55, 8, f'  {label}', border=0, fill=True)
+
             pdf.set_text_color(30, 30, 30)
-            pdf.multi_cell(0, 8, str(value), border=0)
+            pdf.set_font('Arial', '', 9)
+            # Use write instead of cell to avoid overflow
+            x = pdf.get_x()
+            y = pdf.get_y()
+            pdf.set_xy(x, y)
+            pdf.cell(125, 8, val[:80], border=0, fill=True, ln=True)
+            i += 1
 
-        # Received IPs (email module)
-        if 'received_ips' in data and data['received_ips']:
-            pdf.ln(3)
-            pdf.set_font('Arial', 'B', 11)
-            pdf.set_text_color(20, 60, 120)
-            pdf.cell(0, 8, 'Traced IPs:', ln=True)
-            for ip in data['received_ips']:
-                pdf.set_font('Arial', '', 10)
-                pdf.set_text_color(30, 30, 30)
-                pdf.cell(0, 7, f"  IP: {ip['ip']} | {ip['city']}, {ip['country']} | ISP: {ip['isp']}", ln=True)
+        pdf.ln(8)
 
-        # Chart image
-        if chart_b64:
-            pdf.ln(5)
-            pdf.set_font('Arial', 'B', 11)
-            pdf.set_text_color(20, 60, 120)
-            pdf.cell(0, 8, 'Visual Analysis:', ln=True)
-            img_data = base64.b64decode(chart_b64)
-            tmp_path = 'tmp_chart.png'
-            with open(tmp_path, 'wb') as f:
-                f.write(img_data)
-            pdf.image(tmp_path, w=180)
-            os.remove(tmp_path)
+        # Footer line
+        pdf.set_draw_color(79, 195, 247)
+        pdf.set_line_width(0.5)
+        pdf.line(15, pdf.get_y(), 195, pdf.get_y())
+        pdf.ln(4)
 
-        # Save
-        filename = f"CyberTrace_{module_name.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
-        import io
-        buffer = io.BytesIO()
-        pdf.output(buffer)
-        buffer.seek(0)
-        return buffer.getvalue()
+        pdf.set_font('Arial', 'I', 8)
+        pdf.set_text_color(150, 150, 150)
+        pdf.cell(180, 6, 'This report was generated by CyberTrace | Confidential | Cyber Police Station Jammu', ln=True, align='C')
+
+        return bytes(pdf.output())
 
     except Exception as e:
-        print(f"PDF ERROR: {e}")
+        print(f"PDF ERROR: {str(e)}")
         return None
