@@ -1,8 +1,7 @@
 import requests
 import time
 
-API_KEY = "7d9cae9e84191a6334c4313bc816bfaf7c085d08374c3aacf634994ceafb081e"
-
+API_KEY = "814c118b10993344263e291955866314a9354336ea3b73f84106337719055cea"
 def scan_url(url):
     try:
         headers = {"x-apikey": API_KEY}

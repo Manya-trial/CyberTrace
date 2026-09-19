@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()
 import io
 from flask import Flask, render_template, request, send_file
 from modules.ip_analyzer import analyze_ip
